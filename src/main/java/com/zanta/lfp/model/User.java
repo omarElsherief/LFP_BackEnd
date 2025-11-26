@@ -49,7 +49,7 @@ public class User implements UserDetails {
     @NotBlank(message = "Username is required")
     private String username;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     @NotBlank(message = "Password is required")
     private String password;
 
