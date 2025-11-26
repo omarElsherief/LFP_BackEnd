@@ -1,20 +1,25 @@
 package com.zanta.lfp.model;
 
+import com.zanta.lfp.enums.ERole;
+import com.zanta.lfp.enums.Gender;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 
 
-@Setter
-@Getter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -25,7 +30,8 @@ import java.math.BigDecimal;
                 @UniqueConstraint(columnNames = "email")
         }
 )
-public class User {
+
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,14 +58,49 @@ public class User {
     @NotBlank(message = "Email is required")
     private String email;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    boolean gender;
+    Gender gender;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    ERole role;
 
     @Column(name = "join_date", nullable = false)
-    private java.time.LocalDateTime joinDate = java.time.LocalDateTime.now();
+    private LocalDateTime joinDate = LocalDateTime.now();
 
     @Column(precision = 3, scale = 2)
     @DecimalMin(value = "0.00", message = "Rate must be >= 0.00")
     @DecimalMax(value = "5.00", message = "Rate must be <= 5.00")
     private BigDecimal rate = BigDecimal.valueOf(0.00);
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority("ROLE_"+role.name()));
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
