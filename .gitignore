@@ -31,3 +31,20 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# -------------------------------
+# Docker & MySQL
+# -------------------------------
+# Ignore MySQL internal files
+mysql/
+# Keep only init.sql
+!docker/mysql/init.sql
+
+# Docker logs / temp
+docker/*.log
+docker/tmp/
+docker/mysql/mysql.sock
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
