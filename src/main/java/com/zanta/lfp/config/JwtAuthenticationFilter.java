@@ -1,6 +1,5 @@
 package com.zanta.lfp.config;
 
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,42 +36,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-            final String authHeader=request.getHeader("Authorization");
-            final String jwt;
-            final String username;
+        final String authHeader = request.getHeader("Authorization");
+        final String jwt;
+        final String username;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"NO_AUTH_HEADER\"}");
+        if (authHeader == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        String lowerCaseHeader = authHeader.toLowerCase();
+        if (!lowerCaseHeader.startsWith("bearer ")) {
+            filterChain.doFilter(request, response);
             return;
         }
 
-            jwt = authHeader.substring(7);
+        jwt = authHeader.substring(7);
 
-            try {
-                username = jwtService.extractUsername(jwt);
-            } catch (ExpiredJwtException ex) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"error\":\"TOKEN_EXPIRED\"}");
-                return;
-            }catch (Exception ex) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"error\":\"INVALID_TOKEN\"}");
-                return;
-            }
+        try {
+            username = jwtService.extractUsername(jwt);
+        } catch (Exception ex) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-            if(username !=null && SecurityContextHolder.getContext().getAuthentication()==null){
-                UserDetails userDetails=this.userDetailsService.loadUserByUsername(username);
-                if(jwtService.isTokenValid(jwt,userDetails)){
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails
-                    ,userDetails.getAuthorities(),userDetails.getAuthorities());
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+            if (jwtService.isTokenValid(jwt, userDetails)) {
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails
+                        , null, userDetails.getAuthorities());
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
-            filterChain.doFilter(request,response);
+        }
+        filterChain.doFilter(request, response);
     }
 }

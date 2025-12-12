@@ -1,6 +1,7 @@
 package com.zanta.lfp.auth;
 
 
+import com.zanta.lfp.Dto.UserDto;
 import com.zanta.lfp.config.JwtService;
 import com.zanta.lfp.enums.ERole;
 import com.zanta.lfp.model.User;
@@ -24,30 +25,7 @@ public class AuthenticationService {
     public AuthenticationResponse register(RegisterRequest request) {
         checkUsername(request.getUsername());
         checkEmail(request.getEmail());
-
-        ERole roleToAssign = repository.count() == 0 ? ERole.ADMIN : ERole.USER;
-
-        var user= User.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .role(roleToAssign)
-                .gender(request.getGender())
-                .joinDate(LocalDateTime.now())
-                .build();
-        repository.save(user);
-        return response(user);
-    }
-    private void checkUsername(String username){
-        if (repository.existsByUsername(username)) {
-            throw new RuntimeException("Username already taken");
-        }
-    }private void checkEmail(String email){
-        if (repository.existsByEmail(email)) {
-            throw new RuntimeException("Username already taken");
-        }
+        return saveUser(request);
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -62,8 +40,41 @@ public class AuthenticationService {
 
         return response(user);
     }
-    private AuthenticationResponse response(User user){
-        var jwtToken=jwtService.generateToken(user);
-        return AuthenticationResponse.builder().token(jwtToken).build();
+
+    private AuthenticationResponse saveUser(RegisterRequest request) {
+        ERole roleToAssign = repository.count() == 0 ? ERole.ADMIN : ERole.USER;
+        var user = User.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(roleToAssign)
+                .gender(request.getGender())
+                .joinDate(LocalDateTime.now())
+                .build();
+        repository.save(user);
+        return response(user);
+    }
+
+    private AuthenticationResponse response(User user) {
+        var jwtToken = jwtService.generateToken(user);
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .user(UserDto.from(user))
+                .build();
+    }
+
+    // Checkers
+    private void checkUsername(String username) {
+        if (repository.existsByUsername(username)) {
+            throw new RuntimeException("Username already taken");
+        }
+    }
+
+    private void checkEmail(String email) {
+        if (repository.existsByEmail(email)) {
+            throw new RuntimeException("Email already taken");
+        }
     }
 }

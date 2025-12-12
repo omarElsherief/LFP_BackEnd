@@ -28,11 +28,12 @@ public class SecurityConfiguration {
             response.getWriter().write("{\"error\": \"ACCESS_DENIED\"}");
         };
     }
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                        req->req
+                        req -> req
                                 .requestMatchers("/api/v1/auth/**")
                                 .permitAll()
                                 .requestMatchers("/api/v1/admin/**")
@@ -41,12 +42,12 @@ public class SecurityConfiguration {
                                 .authenticated()
                 )
                 .exceptionHandling(
-                        exception->exception
+                        exception -> exception
                                 .accessDeniedHandler(accessDeniedHandler())
                 )
                 .sessionManagement(
 
-                        session->session
+                        session -> session
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

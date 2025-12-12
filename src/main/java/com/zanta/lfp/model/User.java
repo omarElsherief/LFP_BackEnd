@@ -3,11 +3,11 @@ package com.zanta.lfp.model;
 import com.zanta.lfp.enums.ERole;
 import com.zanta.lfp.enums.Gender;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,27 +35,21 @@ public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
-    @Column(name = "first_name", nullable = false, length = 50)
-    @NotBlank(message = "First name is required")
+    @Column(nullable = false, length = 50)
     private String firstName;
 
-    @Column(name = "last_name", nullable = false, length = 50)
-    @NotBlank(message = "Last name is required")
+    @Column(nullable = false, length = 50)
     private String lastName;
 
     @Column(nullable = false, length = 50, unique = true)
-    @NotBlank(message = "Username is required")
     private String username;
 
     @Column(nullable = false)
-    @NotBlank(message = "Password is required")
     private String password;
 
     @Column(nullable = false, length = 100, unique = true)
-    @Email(message = "Invalid email format")
-    @NotBlank(message = "Email is required")
     private String email;
 
     @Enumerated(EnumType.STRING)
@@ -66,17 +60,16 @@ public class User implements UserDetails {
     @Column(nullable = false)
     ERole role;
 
-    @Column(name = "join_date", nullable = false)
-    private LocalDateTime joinDate = LocalDateTime.now();
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime joinDate;
 
     @Column(precision = 3, scale = 2)
-    @DecimalMin(value = "0.00", message = "Rate must be >= 0.00")
-    @DecimalMax(value = "5.00", message = "Rate must be <= 5.00")
     private BigDecimal rate = BigDecimal.valueOf(0.00);
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_"+role.name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 
     @Override
