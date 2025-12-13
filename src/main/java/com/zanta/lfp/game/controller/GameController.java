@@ -1,8 +1,8 @@
-package com.zanta.lfp.controller;
+package com.zanta.lfp.game.controller;
 
 
-import com.zanta.lfp.model.Game;
-import com.zanta.lfp.service.GameService;
+import com.zanta.lfp.game.model.Game;
+import com.zanta.lfp.game.service.GameService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

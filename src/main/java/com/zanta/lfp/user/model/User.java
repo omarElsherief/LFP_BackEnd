@@ -1,7 +1,7 @@
-package com.zanta.lfp.model;
+package com.zanta.lfp.user.model;
 
-import com.zanta.lfp.enums.ERole;
-import com.zanta.lfp.enums.Gender;
+import com.zanta.lfp.user.enums.ERole;
+import com.zanta.lfp.user.enums.Gender;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

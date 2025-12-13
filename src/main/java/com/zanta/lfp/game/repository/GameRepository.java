@@ -1,6 +1,6 @@
-package com.zanta.lfp.repository;
+package com.zanta.lfp.game.repository;
 
-import com.zanta.lfp.model.Game;
+import com.zanta.lfp.game.model.Game;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface GameRepository extends JpaRepository<Game, Integer> {

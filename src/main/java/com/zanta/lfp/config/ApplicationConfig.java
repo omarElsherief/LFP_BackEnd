@@ -1,7 +1,7 @@
 package com.zanta.lfp.config;
 
 
-import com.zanta.lfp.repository.UserRepository;
+import com.zanta.lfp.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

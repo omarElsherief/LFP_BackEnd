@@ -1,4 +1,4 @@
-package com.zanta.lfp.auth;
+package com.zanta.lfp.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

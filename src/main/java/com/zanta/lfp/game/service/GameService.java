@@ -1,8 +1,8 @@
-package com.zanta.lfp.service;
+package com.zanta.lfp.game.service;
 
 
-import com.zanta.lfp.model.Game;
-import com.zanta.lfp.repository.GameRepository;
+import com.zanta.lfp.game.model.Game;
+import com.zanta.lfp.game.repository.GameRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
-package com.zanta.lfp.auth;
+package com.zanta.lfp.auth.dto;
 
-import com.zanta.lfp.enums.Gender;
+import com.zanta.lfp.user.enums.Gender;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

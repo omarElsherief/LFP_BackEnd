@@ -1,4 +1,4 @@
-package com.zanta.lfp.auth;
+package com.zanta.lfp.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,7 +1,7 @@
-package com.zanta.lfp.auth;
+package com.zanta.lfp.auth.dto;
 
 
-import com.zanta.lfp.Dto.UserDto;
+import com.zanta.lfp.user.Dto.UserDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

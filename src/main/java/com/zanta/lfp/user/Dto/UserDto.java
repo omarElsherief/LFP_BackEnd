@@ -1,8 +1,8 @@
-package com.zanta.lfp.Dto;
+package com.zanta.lfp.user.Dto;
 
 
-import com.zanta.lfp.enums.Gender;
-import com.zanta.lfp.model.User;
+import com.zanta.lfp.user.enums.Gender;
+import com.zanta.lfp.user.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +21,7 @@ public class UserDto {
     private Gender gender;
 
     public static UserDto from(User user) {
+        if (user == null) return null;
         return UserDto.builder()
                 .id(user.getId())
                 .firstName(user.getFirstName())
@@ -30,4 +31,5 @@ public class UserDto {
                 .gender(user.getGender())
                 .build();
     }
+
 }

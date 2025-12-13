@@ -1,4 +1,4 @@
-package com.zanta.lfp.enums;
+package com.zanta.lfp.user.enums;
 
 public enum ERole {
     USER,

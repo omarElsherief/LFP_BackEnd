@@ -1,12 +1,17 @@
-package com.zanta.lfp.auth;
+package com.zanta.lfp.auth.service;
 
 
-import com.zanta.lfp.Dto.UserDto;
+import com.zanta.lfp.auth.dto.RegisterRequest;
+import com.zanta.lfp.auth.dto.AuthenticationRequest;
+import com.zanta.lfp.auth.dto.AuthenticationResponse;
+import com.zanta.lfp.user.Dto.UserDto;
 import com.zanta.lfp.config.JwtService;
-import com.zanta.lfp.enums.ERole;
-import com.zanta.lfp.model.User;
-import com.zanta.lfp.repository.UserRepository;
+import com.zanta.lfp.user.enums.ERole;
+import com.zanta.lfp.user.model.User;
+import com.zanta.lfp.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,17 +33,19 @@ public class AuthenticationService {
         return saveUser(request);
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public ResponseEntity<?> authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
                         request.getPassword()
                 )
         );
-        var user = repository.findByUsername(request.getUsername())
-                .orElseThrow();
+        if (!repository.existsByUsername(request.getUsername())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        var user = repository.findByUsername(request.getUsername()).orElseThrow();
 
-        return response(user);
+        return ResponseEntity.ok().body(response(user));
     }
 
     private AuthenticationResponse saveUser(RegisterRequest request) {

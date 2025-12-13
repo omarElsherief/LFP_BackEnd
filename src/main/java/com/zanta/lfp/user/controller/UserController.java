@@ -1,7 +1,7 @@
-package com.zanta.lfp.controller;
+package com.zanta.lfp.user.controller;
 
 
-import com.zanta.lfp.service.UserService;
+import com.zanta.lfp.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +20,11 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         return userService.deleteUser(id);
+    }
+
+    @PostMapping("/{id}/make-admin")
+    public ResponseEntity<?> createAdminUser(@PathVariable Long id) {
+        return userService.createAdminUser(id);
     }
 
 }

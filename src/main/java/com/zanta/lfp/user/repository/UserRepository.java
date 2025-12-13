@@ -1,6 +1,6 @@
-package com.zanta.lfp.repository;
+package com.zanta.lfp.user.repository;
 
-import com.zanta.lfp.model.User;
+import com.zanta.lfp.user.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
