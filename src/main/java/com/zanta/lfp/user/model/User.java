@@ -62,8 +62,10 @@ public class User implements UserDetails {
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
+
     private LocalDateTime joinDate;
 
+    @Builder.Default
     @Column(precision = 3, scale = 2)
     private BigDecimal rate = BigDecimal.valueOf(0.00);
 
