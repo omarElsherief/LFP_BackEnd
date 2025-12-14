@@ -1,6 +1,6 @@
 package com.zanta.lfp.game.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -35,10 +35,11 @@ public class Game {
     private String pictureUrl;
 
     @NotNull(message = "Modes cannot be null")
-    @ElementCollection
+    @Size(min = 1, message = "At least one game mode is required")
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "game_modes", joinColumns = @JoinColumn(name = "game_id"))
     @Column(name = "mode", nullable = false)
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     private List<String> modes;
 }
 

@@ -7,15 +7,18 @@ public record CreatePostDto(
         @Size(max = 200, message = "Post title must be less than 200 characters")
         String title,
 
-        @Size(max = 2000, message = "Post description must be less than 2000 characters")
-        String description,
+        @Size(max = 200, message = "Party code must be less than 2000 characters")
+        String partyCode,
 
         @NotNull(message = "Team size cannot be null")
         @Min(value = 2, message = "Team size must be at least 2")
         int teamSize,
 
         @NotNull(message = "Game ID cannot be null")
-        Integer gameId
+        Integer gameId,
 
+        String rank,
+
+        Boolean voiceChat
 
 ) {}

@@ -13,18 +13,21 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("api/v1/posts")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class PostController {
     private final PostService postService;
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllPosts() {
-        return postService.getAllPosts();
+    public ResponseEntity<?> getAllPosts(@AuthenticationPrincipal User user) {
+        Long userId = user != null ? user.getId() : null;
+        return postService.getAllPosts(userId);
     }
 
     // Get post by ID
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPost(@PathVariable Long id) {
-        return postService.getPost(id);
+    public ResponseEntity<?> getPost(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        Long userId = user != null ? user.getId() : null;
+        return postService.getPost(id, userId);
     }
 
 
@@ -40,71 +43,25 @@ public class PostController {
                                         @AuthenticationPrincipal User user) {
         return postService.deletePost(id, user.getId());
     }
-}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-package com.zanta.lfp.post.controller;
-
-import com.zanta.lfp.post.dto.CreatePostDto;
-import com.zanta.lfp.post.service.PostService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-
-@RestController
-@RequestMapping("/api/v1/posts")
-@RequiredArgsConstructor
-public class PostController {
-
-    private final PostService postService;
-
-    // Create a post
-    @PostMapping("/create")
-    public ResponseEntity<?> createPost(@Valid @RequestBody CreatePostDto dto, Authentication auth) {
-        // Get logged-in user ID from auth (adjust if using JWT or session)
-        int ownerId = Integer.parseInt(auth.getName());
-        return postService.createPost(dto, ownerId);
+    // Join a post
+    @PostMapping("/{id}/join")
+    public ResponseEntity<?> joinPost(@PathVariable Long id,
+                                      @AuthenticationPrincipal User user) {
+        return postService.joinPost(id, user.getId());
     }
 
-    // Get all posts
-    @GetMapping("/all")
-    public ResponseEntity<?> getAllPosts() {
-        return postService.getAllPosts();
-    }
-
-    // Get single post
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getPost(@PathVariable Long id) {
-        return postService.getPost(id);
-    }
-
-    // Delete a post (only owner)
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletePost(@PathVariable Long id, Authentication auth) {
-        int userId = Integer.parseInt(auth.getName());
-        return postService.deletePost(id, userId);
+    // Cancel/Leave a post
+    @PostMapping("/{id}/cancel-join")
+    public ResponseEntity<?> cancelJoin(@PathVariable Long id,
+                                        @AuthenticationPrincipal User user) {
+        return postService.cancelJoin(id, user.getId());
     }
 }
-*/
+
+// localhost:8080/api/v1/posts/all  [GET]
+// localhost:8080/api/v1/posts/{id}  [GET]
+// localhost:8080/api/v1/posts  [POST]
+// localhost:8080/api/v1/posts/{id}  [DELETE]
+// localhost:8080/api/v1/posts/{id}/join  [POST]
+// localhost:8080/api/v1/posts/{id}/cancel-join  [POST]

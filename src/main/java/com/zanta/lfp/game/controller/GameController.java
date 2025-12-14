@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/games")
+@CrossOrigin(origins = "*")
 public class GameController {
     private final GameService gameService;
 
@@ -37,3 +38,9 @@ public class GameController {
         return gameService.addGame(game);
     }
 }
+
+
+// localhost:8080/api/v1/games/all  [GET]
+// localhost:8080/api/v1/games/{name} [GET]
+// localhost:8080/api/v1/games/add  [POST]
+// localhost:8080/api/v1/games/{name} [DELETE]

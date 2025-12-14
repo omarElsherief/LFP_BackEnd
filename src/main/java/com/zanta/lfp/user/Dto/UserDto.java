@@ -1,6 +1,7 @@
 package com.zanta.lfp.user.Dto;
 
 
+import com.zanta.lfp.user.enums.ERole;
 import com.zanta.lfp.user.enums.Gender;
 import com.zanta.lfp.user.model.User;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ public class UserDto {
     private String username;
     private String email;
     private Gender gender;
+    private ERole role;
 
     public static UserDto from(User user) {
         if (user == null) return null;
@@ -29,6 +31,7 @@ public class UserDto {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .gender(user.getGender())
+                .role(user.getRole())
                 .build();
     }
 

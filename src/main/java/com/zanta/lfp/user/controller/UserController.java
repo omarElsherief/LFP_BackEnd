@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/admin/users")
+@CrossOrigin(origins = "*")
 public class UserController {
     private final UserService userService;
 
@@ -28,3 +29,8 @@ public class UserController {
     }
 
 }
+
+
+// localhost:8080/api/v1/admin/users  [GET]
+// localhost:8080/api/v1/admin/users/{id}  [DELETE]
+// localhost:8080/api/v1/admin/users/{id}/make-admin  [POST]

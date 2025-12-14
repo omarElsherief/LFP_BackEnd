@@ -10,13 +10,16 @@ public record PostDto (
 
         Long id ,
         String title,
-        String description,
+        String partyCode ,
         int teamSize ,
         int currentPlayers,
         UserDto owner,
         Game game ,
         LocalDateTime CreatedAt,
-        Boolean active
+        Boolean active,
+        String playerRank,
+        Boolean voiceChat,
+        Boolean hasJoined  // null if user not logged in, true if joined, false if not joined
 )
 {}
 

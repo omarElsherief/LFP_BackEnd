@@ -38,9 +38,9 @@ public class Post {
 
 
 
-    @Size(max = 2000, message = "Post description must be less than 2000 characters")
-    @Column(length = 2000)
-    private String description;
+    @Size(max = 200, message = "Party code must be less than 200 characters")
+    @Column(length = 200)
+    private String partyCode;
 
 
     @NotNull(message = "Team size cannot be null")
@@ -68,11 +68,19 @@ public class Post {
     @Column(nullable = false)
     private Boolean active = true;
 
+    @Column(length = 50)
+    private String playerRank;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean voiceChat = false;
+
     @PrePersist
     public void prePersist() {
         createdAt = LocalDateTime.now();
         if (currentPlayers == null) currentPlayers = 0;
         if (active == null) active = true;
+        if (voiceChat == null) voiceChat = false;
     }
 
 
