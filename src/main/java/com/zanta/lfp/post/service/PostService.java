@@ -6,7 +6,9 @@ import com.zanta.lfp.user.model.User;
 import com.zanta.lfp.post.dto.CreatePostDto;
 import com.zanta.lfp.post.dto.PostDto;
 import com.zanta.lfp.post.model.Post;
+import com.zanta.lfp.post.model.PostParticipant;
 import com.zanta.lfp.post.repository.PostRepository;
+import com.zanta.lfp.post.repository.PostParticipantRepository;
 import com.zanta.lfp.game.repository.GameRepository;
 import com.zanta.lfp.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -24,6 +26,7 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final GameRepository gameRepository;
+    private final PostParticipantRepository postParticipantRepository;
 
     public ResponseEntity<?> createPost(CreatePostDto dto ,Long ownerId){
         //get user
@@ -40,34 +43,51 @@ public class PostService {
         //creating post
         Post post = Post.builder()
                 .title(dto.title())
-                .description(dto.description())
+                .partyCode(dto.partyCode())
                 .teamSize(dto.teamSize())
                 .currentPlayers(0)
                 .owner(owner)
                 .game(game)
                 .createdAt(LocalDateTime.now())
                 .active(true)
+                .playerRank(dto.rank())
+                .voiceChat(dto.voiceChat() != null ? dto.voiceChat() : false)
                 .build();
 
         postRepository.save(post);
 
-        return ResponseEntity.ok(Map.of("message", "Post created successfully", "post", mapToDto(post)));
+        return ResponseEntity.ok(Map.of("message", "Post created successfully", "post", mapToDto(post, ownerId)));
 
     }
 
-    public ResponseEntity<?> getAllPosts() {
-        List<PostDto> posts = postRepository.findAll()
+    @Transactional
+    public ResponseEntity<?> getAllPosts(Long userId) {
+        // First, deactivate posts older than 6 hours
+        deactivateOldPosts();
+        
+        // Get only active posts
+        List<PostDto> posts = postRepository.findByActiveTrue()
                 .stream()
-                .map(this::mapToDto)
+                .map(post -> mapToDto(post, userId))
                 .toList();
 
         return ResponseEntity.ok(Map.of("posts", posts));
     }
 
-    public ResponseEntity<?> getPost(Long id) {
+    @Transactional
+    protected void deactivateOldPosts() {
+        LocalDateTime sixHoursAgo = LocalDateTime.now().minusHours(6);
+        List<Post> oldPosts = postRepository.findByActiveTrueAndCreatedAtBefore(sixHoursAgo);
+        for (Post post : oldPosts) {
+            post.setActive(false);
+            postRepository.save(post);
+        }
+    }
+
+    public ResponseEntity<?> getPost(Long id, Long userId) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found , no post with this Id"));
-        return ResponseEntity.ok(Map.of("post", mapToDto(post)));
+        return ResponseEntity.ok(Map.of("post", mapToDto(post, userId)));
     }
 
     @Transactional
@@ -91,18 +111,104 @@ public class PostService {
         return ResponseEntity.ok(Map.of("message", "Post deleted successfully"));
     }
 
+    @Transactional
+    public ResponseEntity<?> joinPost(Long postId, Long userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Check if user is the creator
+        if (post.getOwner().getId().equals(userId)) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "You are the creator, you are already in"));
+        }
+
+        // Check if user has already joined
+        if (postParticipantRepository.existsByPostIdAndUserId(postId, userId)) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "You have already joined this post"));
+        }
+
+        // Check if post is full
+        if (post.getCurrentPlayers() >= post.getTeamSize()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Post is full"));
+        }
+
+        // Check if post is active
+        if (!post.getActive()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Post is no longer active"));
+        }
+
+        // Create participant record
+        PostParticipant participant = PostParticipant.builder()
+                .post(post)
+                .user(user)
+                .build();
+        postParticipantRepository.save(participant);
+
+        // Increment current players
+        post.setCurrentPlayers(post.getCurrentPlayers() + 1);
+        postRepository.save(post);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "You joined successfully",
+                "post", mapToDto(post, userId)
+        ));
+    }
+
+    @Transactional
+    public ResponseEntity<?> cancelJoin(Long postId, Long userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Check if user is the creator
+        if (post.getOwner().getId().equals(userId)) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "You are the creator, you cannot leave your own post"));
+        }
+
+        // Check if user has joined
+        if (!postParticipantRepository.existsByPostIdAndUserId(postId, userId)) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "You have not joined this post"));
+        }
+
+        // Remove participant
+        postParticipantRepository.deleteByPostIdAndUserId(postId, userId);
+
+        // Decrement current players
+        post.setCurrentPlayers(Math.max(0, post.getCurrentPlayers() - 1));
+        postRepository.save(post);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "You left the post successfully",
+                "post", mapToDto(post, userId)
+        ));
+    }
+
     // Mapper
-    private PostDto mapToDto(Post post) {
+    private PostDto mapToDto(Post post, Long userId) {
+        boolean hasJoined = userId != null && postParticipantRepository.existsByPostIdAndUserId(post.getId(), userId);
         return new PostDto(
                 post.getId(),
                 post.getTitle(),
-                post.getDescription(),
+                post.getPartyCode(),
                 post.getTeamSize(),
                 post.getCurrentPlayers(),
                 UserDto.from(post.getOwner()),
                 post.getGame(),
                 post.getCreatedAt(),
-                post.getActive()
+                post.getActive(),
+                post.getPlayerRank(),
+                post.getVoiceChat(),
+                hasJoined
         );
     }
 
